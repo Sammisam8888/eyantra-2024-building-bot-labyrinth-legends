@@ -119,7 +119,7 @@ def main_function():  # Don't change anything in this function
     
     if not eq_points:
         print("No equilibrium points found.")
-        return [],[],[],[],None
+        return None, None, None, None, None, None
     
     # Find Jacobian matrices
     jacobians_A, jacobians_B = find_A_B_matrices(eq_points)

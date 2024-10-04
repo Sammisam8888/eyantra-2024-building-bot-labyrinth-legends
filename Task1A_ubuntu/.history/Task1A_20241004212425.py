@@ -119,7 +119,7 @@ def main_function():  # Don't change anything in this function
     
     if not eq_points:
         print("No equilibrium points found.")
-        return [],[],[],[],None
+        return None, None, None, None, None, None
     
     # Find Jacobian matrices
     jacobians_A, jacobians_B = find_A_B_matrices(eq_points)
@@ -161,11 +161,10 @@ def task1a_output():
 
 if __name__ == "__main__":
     # Run the main function
-   results = main_function()
-if results is None:
-    print("No equilibrium points found. Exiting.")
-    exit()
-else:
+    results = main_function()
+    
+    # This will get the equilibrium points, A_matrix, eigen values, stability of the system
     eq_points, jacobians_A, eigen_values, stability, K = results
+
     # print the results
     task1a_output()
