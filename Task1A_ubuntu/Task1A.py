@@ -2,37 +2,37 @@ import sympy as sp
 import numpy as np
 import control
 
-########## Initialization of variables & provided  
+
 # Define the symbolic variables
 x1, x2, u = sp.symbols('x1 x2 u')
 
 # Define the differential equations
-x1_dot = sp.symbols('x1_dot')
-x2_dot = sp.symbols('x2_dot')
-##################################################
+x1_dot = -x1 + 2 * x1 ** 3 + x2 + 4 * u
+x2_dot = -x1 - x2 + 2 * u
 
-# Initialization of equation
-eq1 = sp.Eq(x1_dot, -x1 + 2 * x1 ** 3 + x2 + 4 * u)
-eq2 = sp.Eq(x2_dot, -x1 - x2 + 2 * u)
-
+# Initialization of equations
+eq1 = sp.Eq(x1_dot, 0)
+eq2 = sp.Eq(x2_dot, 0)
 
 def find_equilibrium_points():
     '''
-    1. Substitute input(u) = 0 in both equation for finding equilibrium points 
-    2. Equate x1_dot, x2_dot equal to zero for finding equilibrium points 
-    3. Solve the x1_dot, x2_dot equations for the unknown variables and save the value to the variable namely "equi_points"
+    1. Substitute input(u) = 0 in both equations for finding equilibrium points.
+    2. Equate x1_dot and x2_dot to zero to solve for the equilibrium points.
+    3. Solve the equations for the unknown variables and save the value to "equi_points".
     '''
     
+    # Substitute u = 0 in the differential equations
     eq1_sub = eq1.subs(u, 0)
     eq2_sub = eq2.subs(u, 0)
 
-    eq11 = sp.Eq(eq1_sub, 0)
-    eq21 = sp.Eq(eq2_sub, 0)
-    
-    equi_points = sp.solve([eq11, eq21], (x1, x2))
+    # Solve the system of equations for x1 and x2
+    equi_points = sp.solve([eq1_sub, eq2_sub], (x1, x2))
 
     return equi_points
 
+# Test the function to find equilibrium points
+equilibrium_points = find_equilibrium_points()
+print("Equilibrium Points:", equilibrium_points)
 
 def find_A_B_matrices(eq_points):
     '''
@@ -52,8 +52,8 @@ def find_A_B_matrices(eq_points):
     A_matrices, B_matrices = [], []
 
     for i, point in enumerate(eq_points, 1):
-        A_sub = A_matrix.subs({x1: point[x1], x2: point[x2]})
-        B_sub = B_matrix.subs({x1: point[x1], x2: point[x2]})
+        A_sub = A_matrix.subs({x1: point[0], x2: point[1]})
+        B_sub = B_matrix.subs({x1: point[0], x2: point[1]})
         A_matrices.append(A_sub)
         B_matrices.append(B_sub)
 
@@ -116,7 +116,7 @@ def compute_lqr_gain(jacobians_A, jacobians_B):
 def main_function():  # Don't change anything in this function 
     # Find equilibrium points
     eq_points = find_equilibrium_points()
-    
+    # print("eqpoints = ",eq_points)
     if not eq_points:
         print("No equilibrium points found.")
         return [],[],[],[],None
@@ -161,11 +161,13 @@ def task1a_output():
 
 if __name__ == "__main__":
     # Run the main function
-   results = main_function()
-if results is None:
-    print("No equilibrium points found. Exiting.")
-    exit()
-else:
-    eq_points, jacobians_A, eigen_values, stability, K = results
-    # print the results
-    task1a_output()
+    results = main_function()
+    # print(results)
+    if results is None:
+        print("No equilibrium points found Exiting.")
+        exit()
+    else:
+        eq_points, jacobians_A, eigen_values, stability, K = results
+        # print the results
+        task1a_output()
+
