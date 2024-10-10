@@ -96,32 +96,8 @@ def main_function():
     return eq_points, jacobians_A, eigen_values, stability, K
 
 
-def task1a_output():
-    print("Equilibrium Points:")
-    for i, point in enumerate(eq_points):
-        print(f"  Point {i + 1}: x1 = {point[0]}, x2 = {point[1]}")
-
-    print("\nJacobian Matrices at Equilibrium Points:")
-    for i, matrix in enumerate(jacobians_A):
-        print(f"  At Point {i + 1}:")
-        print(sp.pretty(matrix, use_unicode=True))
-
-    print("\nEigenvalues at Equilibrium Points:")
-    for i, eigvals in enumerate(eigen_values):
-        eigvals_str = ', '.join([f"{val}: {count}" for val, count in eigvals.items()])
-        print(f"  At Point {i + 1}: {eigvals_str}")
-
-    print("\nStability of Equilibrium Points:")
-    for i, status in enumerate(stability):
-        print(f"  At Point {i + 1}: {status}")
-
-    print("\nLQR Gain Matrix K at the selected Equilibrium Point:")
-    print(K)
-
-
-
 def sysCall_init():
-   
+    main_function();   
     global bot_body, left_joint, right_joint, K, setpoint
     # Get handles for the objects in the scene
     bot_body = sim.getObjectHandle('bot_body')
@@ -172,16 +148,9 @@ if __name__ == "__main__":
 
     if clientID != -1:
         print('Connected to CoppeliaSim')
-        results = main_function()
-        if results is None:
-            print("No equilibrium points found. Exiting.")
-            exit()
-        else:
-            eq_points, jacobians_A, eigen_values, stability, K = results
-            task1a_output()
-
-        # Your simulation control logic here
-        # ...
+        sysCall_init()
+        while (true):
+            sysCall_actuation()
         
 
         # Disconnect from the simulator
