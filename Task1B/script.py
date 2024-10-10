@@ -1,38 +1,62 @@
-import numpy as np
-import control
-
-
 
 def sysCall_init():
-    main_function();   
-    global bot_body, left_joint, right_joint, K, setpoint
-    # Get handles for the objects in the scene
-    bot_body = sim.getObjectHandle('bot_body')
-    left_joint = sim.getObjectHandle('left_joint')
-    right_joint = sim.getObjectHandle('right_joint')
+    sim = require('sim')
 
-    # Define the desired setpoint (for example, upright position)
-    setpoint = 0  # Target upright position
+    # Initialize the scene objects
+    global bot_body, left_joint, right_joint
+    
+    try:
+        # Get object handles for the bot's components
+        bot_body = sim.getObject('\body')  # Adjust this path based on your scene
+        left_joint = sim.getObject('\left_joint')  # Adjust this path based on your scene
+        right_joint = sim.getObject('\right_joint')  # Adjust this path based on your scene
+        
+        # Debugging messages
+        sim.addStatusbarMessage(f"bot_body handle: {bot_body}, left_joint handle: {left_joint}, right_joint handle: {right_joint}")
+        
+    except Exception as e:
+        sim.addStatusbarMessage("Error accessing objects: " + str(e))
+        return  # Exit if objects are not found
 
+    # Initialize algorithm-related variables
+    global desired_position, current_angle, previous_error, integral, kp, ki, kd
+    desired_position = 0.0  # Target position for the bot
+    current_angle = 0.0
+    previous_error = 0.0
+    integral = 0.0
+
+    # PID coefficients
+    kp = 1.0
+    ki = 0.1
+    kd = 0.05
 
 def sysCall_actuation():
-    global bot_body, left_joint, right_joint, K, setpoint
+    # This function is executed at each simulation time step
+    global bot_body, left_joint, right_joint, desired_position, previous_error, integral, kp, ki, kd
 
-    # Get bot's current position and velocity (angle and angular velocity)
-    position = sim.getObjectPosition(bot_body, -1)
-    orientation = sim.getObjectOrientation(bot_body, -1)
-    _, angular_velocity = sim.getObjectVelocity(bot_body)
+    # Get the current angle of the bot (assuming upright Z position)
+    current_angle = sim.getObjectPosition(bot_body, -1)[1]
 
-    # Calculate error state (x1 = angular position error, x2 = angular velocity error)
-    x1 = orientation[1] - setpoint  # Error in angular position (y-axis for tilt)
-    x2 = angular_velocity[1]  # Error in angular velocity (y-axis for tilt velocity)
+    # Calculate error
+    error = desired_position - current_angle
+    integral += error
+    derivative = error - previous_error
 
+    # Calculate control output (PID)
+    control_output = kp * error + ki * integral + kd * derivative
+
+    # Set joint actuation based on control output
+    sim.setJointTargetVelocity(left_joint, control_output)
+    sim.setJointTargetVelocity(right_joint, control_output)
+
+    # Update previous error
+    previous_error = error
 
 def sysCall_sensing():
-    pass
-
+    # This function is executed at each simulation time step
+    pass  # Add any additional sensing logic if required
 
 def sysCall_cleanup():
+    # This function is executed when the simulation ends
+    # Any cleanup to take the scene back to its original state after simulation
     pass
-
-
