@@ -1,4 +1,3 @@
-
 def sysCall_init():
     sim = require('sim')
 
@@ -7,9 +6,9 @@ def sysCall_init():
     
     try:
         # Get object handles for the bot's components
-        bot_body = sim.getObject('\body')  # Adjust this path based on your scene
-        left_joint = sim.getObject('\left_joint')  # Adjust this path based on your scene
-        right_joint = sim.getObject('\right_joint')  # Adjust this path based on your scene
+        bot_body = sim.getObject('/body')  # Adjust this path based on your scene
+        left_joint = sim.getObject('/left_joint')  # Adjust this path based on your scene
+        right_joint = sim.getObject('/right_joint')  # Adjust this path based on your scene
         
         # Debugging messages
         sim.addStatusbarMessage(f"bot_body handle: {bot_body}, left_joint handle: {left_joint}, right_joint handle: {right_joint}")
@@ -25,17 +24,17 @@ def sysCall_init():
     previous_error = 0.0
     integral = 0.0
 
-    # PID coefficients
-    kp = 1.0
-    ki = 0.1
-    kd = 0.05
+    # Adjusted PID coefficients
+    kp = 50.0  # Set kp to 50
+    ki = kp / 4  # ki = kp / 4
+    kd = kp / ki  # Adjust to satisfy kp/ki = 4/1
 
 def sysCall_actuation():
     # This function is executed at each simulation time step
     global bot_body, left_joint, right_joint, desired_position, previous_error, integral, kp, ki, kd
 
-    # Get the current angle of the bot (assuming upright Z position)
-    current_angle = sim.getObjectPosition(bot_body, -1)[1]
+    # Get the current angle of the bot (assuming upright Y position now)
+    current_angle = sim.getObjectPosition(bot_body, -1)[1]  # Now tracking Y-axis
 
     # Calculate error
     error = desired_position - current_angle
