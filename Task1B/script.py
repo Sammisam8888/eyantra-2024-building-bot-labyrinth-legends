@@ -19,24 +19,24 @@ def sysCall_init():
 
     # Initialize algorithm-related variables
     global desired_position, current_angle, previous_error, integral, kp, ki, kd
-    desired_position = 0.0  # Target position for the bot
+    desired_position = 0.0  # Target upright position for the bot (no tilt)
     current_angle = 0.0
     previous_error = 0.0
     integral = 0.0
 
-    # Adjusted PID coefficients
-    kp = 50.0  # Set kp to 50
-    ki = kp / 4  # ki = kp / 4
-    kd = kp / ki  # Adjust to satisfy kp/ki = 4/1
+    # Adjusted PID coefficients for better balancing
+    kp = 0.009824600508967166  # Increase proportional gain to react more to errors
+    ki = 4.723273606010673e-05  # Increase integral gain to eliminate steady-state errors
+    kd = 7.984421807863955e-06   # Increase derivative gain to dampen oscillations
 
 def sysCall_actuation():
     # This function is executed at each simulation time step
     global bot_body, left_joint, right_joint, desired_position, previous_error, integral, kp, ki, kd
 
-    # Get the current angle of the bot (assuming upright Y position now)
-    current_angle = sim.getObjectPosition(bot_body, -1)[1]  # Now tracking Y-axis
+    # Get the current tilt of the bot (assuming upright Y position)
+    current_angle = sim.getObjectOrientation(bot_body, -1)[1]  # Y-axis orientation (pitch)
 
-    # Calculate error
+    # Calculate error (desired position is 0, which means no tilt)
     error = desired_position - current_angle
     integral += error
     derivative = error - previous_error
@@ -44,11 +44,15 @@ def sysCall_actuation():
     # Calculate control output (PID)
     control_output = kp * error + ki * integral + kd * derivative
 
-    # Set joint actuation based on control output
+    # Limit control output to avoid excessive speeds
+    max_velocity = 10.0  # Adjust this value based on your bot's capabilities
+    control_output = max(min(control_output, max_velocity), -max_velocity)
+
+    # Set joint actuation based on control output (apply the same to both joints for balance)
     sim.setJointTargetVelocity(left_joint, control_output)
     sim.setJointTargetVelocity(right_joint, control_output)
 
-    # Update previous error
+    # Update previous error for the next iteration
     previous_error = error
 
 def sysCall_sensing():
